@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - دار العطور الفاخرة</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="container">
+            <h1>لوحة التحكم</h1>
+            <div class="header-actions">
+                <span id="adminUsername">مشرف</span>
+                <button id="logoutBtn" class="btn-logout">تسجيل الخروج</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="admin-nav">
+        <div class="container">
+            <button class="nav-btn active" data-tab="perfumes">إدارة العطور</button>
+            <button class="nav-btn" data-tab="bottles">إدارة الزجاجات</button>
+            <button class="nav-btn" data-tab="orders">عرض الطلبات</button>
+            <button class="nav-btn" data-tab="backup">نسخ احتياطي</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="admin-content">
+        <!-- Perfumes Management -->
+        <section id="perfumesTab" class="tab-content active">
+            <div class="section-header">
+                <h2>إدارة العطور</h2>
+                <button class="btn-add" onclick="adminInterface.showAddPerfumeForm()">
+                    + إضافة عطر جديد
+                </button>
+            </div>
+            
+            <div id="perfumesList" class="items-grid">
+                <!-- سيتم ملؤها بالJavaScript -->
+            </div>
+        </section>
+
+        <!-- Bottles Management -->
+        <section id="bottlesTab" class="tab-content">
+            <div class="section-header">
+                <h2>إدارة الزجاجات</h2>
+                <button class="btn-add" onclick="adminInterface.showAddBottleForm()">
+                    + إضافة زجاجة جديدة
+                </button>
+            </div>
+            
+            <div id="bottlesList" class="items-grid">
+                <!-- سيتم ملؤها بالJavaScript -->
+            </div>
+        </section>
+
+        <!-- Orders View -->
+        <section id="ordersTab" class="tab-content">
+            <div class="section-header">
+                <h2>الطلبات الواردة</h2>
+                <button class="btn-export" onclick="adminInterface.exportOrders()">
+                    تصدير الطلبات
+                </button>
+            </div>
+            
+            <div id="ordersList" class="orders-container">
+                <!-- سيتم ملؤها بالJavaScript -->
+            </div>
+        </section>
+
+        <!-- Backup Section -->
+        <section id="backupTab" class="tab-content">
+            <div class="backup-container">
+                <h2>النسخ الاحتياطي</h2>
+                <div class="backup-actions">
+                    <button class="btn-backup" onclick="dataManager.exportData()">
+                        تصدير جميع البيانات
+                    </button>
+                    <div class="import-section">
+                        <label for="importFile" class="btn-import">
+                            استيراد البيانات
+                        </label>
+                        <input type="file" id="importFile" accept=".json" style="display: none;">
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modals -->
+    <!-- Add Perfume Modal -->
+    <div id="perfumeModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>إضافة عطر جديد</h3>
+            <form id="perfumeForm">
+                <div class="form-group">
+                    <label>اسم العطر</label>
+                    <input type="text" id="perfumeName" required>
+                </div>
+                <div class="form-group">
+                    <label>الوصف</label>
+                    <textarea id="perfumeDescription" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>السعر للمل</label>
+                    <input type="number" id="perfumePrice" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label>النوع</label>
+                    <select id="perfumeType" required>
+                        <option value="men">رجالي</option>
+                        <option value="women">نسائي</option>
+                        <option value="unisex">مشترك</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>رابط الصورة</label>
+                    <input type="url" id="perfumeImage" placeholder="https://...">
+                </div>
+                <button type="submit" class="btn-submit">حفظ العطر</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Bottle Modal -->
+    <div id="bottleModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>إضافة زجاجة جديدة</h3>
+            <form id="bottleForm">
+                <div class="form-group">
+                    <label>اسم الزجاجة</label>
+                    <input type="text" id="bottleName" required>
+                </div>
+                <div class="form-group">
+                    <label>السعة (مل)</label>
+                    <input type="number" id="bottleCapacity" required>
+                </div>
+                <div class="form-group">
+                    <label>سعر الزجاجة</label>
+                    <input type="number" id="bottlePrice" required>
+                </div>
+                <div class="form-group">
+                    <label>الوصف</label>
+                    <textarea id="bottleDescription" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>رابط الصورة</label>
+                    <input type="url" id="bottleImage" placeholder="https://...">
+                </div>
+                <button type="submit" class="btn-submit">حفظ الزجاجة</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

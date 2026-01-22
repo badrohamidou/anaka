@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>عطور الأناقة</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700&display=swap');
+  :root{--gold:#d4af37;--black:#121212;--white:#fafafa;}
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Tajawal',sans-serif;}
+  body{background:var(--black);color:var(--white);direction:rtl;}
+  header{text-align:center;padding:40px 20px 20px;}
+  header h1{font-size:2.8rem;color:var(--gold);letter-spacing:2px;animation:fadeIn 1s ease-in;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(-20px);}to{opacity:1;transform:translateY(0);}}
+  .container{max-width:1100px;margin:auto;padding:20px;}
+  .section{background:#1e1e1e;border-radius:12px;padding:25px;margin-bottom:25px;box-shadow:0 8px 20px rgba(0,0,0,.5);animation:slide .8s ease;}
+  @keyframes slide{from{opacity:0;transform:translateX(-30px);}to{opacity:1;transform:translateX(0);}}
+  select, input, button{width:100%;padding:12px;margin:8px 0;border-radius:8px;border:none;font-size:1rem;}
+  select,input{background:var(--white);color:var(--black);}
+  button{background:var(--gold);color:var(--black);font-weight:bold;cursor:pointer;transition:.3s;}
+  button:hover{filter:brightness(1.2);}
+  .perfume-card, .bottle-card{display:flex;align-items:center;gap:15px;background:#2a2a3a;padding:15px;border-radius:10px;margin:10px 0;}
+  .perfume-card img, .bottle-card img{width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid var(--gold);}
+  .cart-item{background:#333;padding:10px;border-radius:8px;margin:8px 0;display:flex;justify-content:space-between;align-items:center;}
+  .admin-btn{position:fixed;top:20px;left:20px;background:var(--gold);color:var(--black);padding:8px 18px;border-radius:20px;cursor:pointer;z-index:999;}
+  .admin-panel{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:1000;overflow:auto;}
+  .admin-box{background:#1e1e1e;margin:5% auto;padding:30px;width:90%;max-width:750px;border-radius:12px;}
+  .close-admin{float:left;font-size:1.5rem;cursor:pointer;color:var(--gold);}
+  textarea{width:100%;height:70px;resize:none;padding:10px;border-radius:8px;border:none;}
+  .inline{display:flex;gap:10px;}
+  .inline input{flex:1;}
+  .img-preview{width:70px;height:70px;object-fit:cover;border-radius:8px;border:2px solid var(--gold);}
+  .upload-btn{background:#444;color:var(--white);}
+  .share-btn{background:#25D366;color:#fff;margin-top:6px;}
+  .search-row{display:flex;gap:10px;margin-bottom:12px;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>عطور الأناقة</h1>
+  <p>اختر زجاجتك ثم عطرك الفاخر</p>
+</header>
+
+<div class="container">
+  <!-- قسم العميل -->
+  <div class="section">
+    <h2>خطوات الطلب</h2>
+
+    <!-- الزجاجات أولاً -->
+    <label>١. اختر الزجاجة:</label>
+    <div id="bottleList"></div>
+
+    <!-- العطور (مخفية حتى اختيار الزجاجة) -->
+    <div id="perfumeSec" style="display:none;">
+      <div class="search-row">
+        <input id="searchBox" placeholder="ابحث باسم العطر..." oninput="filterPerfumes()">
+        <select onchange="sortPerfumes(this.value)">
+          <option value="0">الترتيب الافتراضي</option>
+          <option value="1">الأقل سعراً</option>
+          <option value="2">الأعلى سعراً</option>
+        </select>
+      </div>
+      <label>٢. اختر العطر:</label>
+      <div id="perfumeList"></div>
+    </div>
+
+    <!-- سلة المشتريات -->
+    <div class="section" id="cartSec" style="display:none;">
+      <h3>سلة المشتريات</h3>
+      <div id="cartItems"></div>
+      <div id="cartTotal" style="color:var(--gold);font-size:1.2rem;margin-top:10px;"></div>
+    </div>
+
+    <!-- بيانات العميل + ملاحظات -->
+    <div id="customerSec" style="display:none;">
+      <label>رقم هاتفك:</label>
+      <input type="tel" id="phone" placeholder="05xxxxxxxx">
+      <label>العنوان (وهران):</label>
+      <input type="text" id="address" placeholder="العنوان الكامل">
+      <label>ملاحظات أو طلب خاص:</label>
+      <textarea id="notes" placeholder="اختياري..."></textarea>
+      <button onclick="sendOrder()">إتمام الطلب</button>
+    </div>
+  </div>
+</div>
+
+<!-- زر الأدمين -->
+<div class="admin-btn" onclick="openAdmin()">Admin Panel</div>
+
+<!-- لوحة الأدمين -->
+<div id="adminPanel" class="admin-panel">
+  <div class="admin-box">
+    <span class="close-admin" onclick="closeAdmin()">×</span>
+    <h2 style="color:var(--gold)">لوحة التحكم</h2>
+
+    <!-- إضافة زجاجة -->
+    <h3>إضافة زجاجة</h3>
+    <div class="inline">
+      <input id="bName" placeholder="اسم/نوع الزجاجة">
+      <input id="bCapacity" type="number" placeholder="السعة (مل)">
+      <input id="bPrice" type="number" placeholder="سعر الزجاجة (دج)">
+    </div>
+    <input id="bImg" placeholder="رابط صورة الزجاجة (ستُملأ تلقائياً بعد الرفع)">
+    <input type="file" id="bImgFile" accept="image/*" onchange="uploadImage(this,'bImg')">
+    <button onclick="addBottle()">إضافة زجاجة</button>
+
+    <!-- إضافة عطر -->
+    <h3>إضافة عطر</h3>
+    <div class="inline">
+      <input id="pName" placeholder="اسم العطر">
+      <input id="pPrice" type="number" placeholder="السعر (دج/مل)" step="0.1">
+    </div>
+    <input id="pImg" placeholder="رابط صورة العطر (ستُملأ تلقائياً بعد الرفع)">
+    <input type="file" id="pImgFile" accept="image/*" onchange="uploadImage(this,'pImg')">
+    <textarea id="pDesc" placeholder="وصف العطر"></textarea>
+    <button onclick="addPerfume()">إضافة عطر</button>
+
+    <!-- سعر التوصيل -->
+    <h3>سعر التوصيل داخل وهران</h3>
+    <input id="shipPrice" type="number" placeholder="السعر (دج)" value="400">
+    <button onclick="saveShip()">حفظ السعر</button>
+
+    <!-- القوائم -->
+    <h3>قائمة الزجاجات</h3>
+    <div id="bottleList"></div>
+    <h3>قائمة العطور</h3>
+    <div id="perfumeList"></div>
+  </div>
+</div>
+
+<script>
+  // البيانات المحلية
+  let perfumes   = JSON.parse(localStorage.getItem('perfumes'))||[];
+  let bottles    = JSON.parse(localStorage.getItem('bottles'))||[];
+  let cart       = JSON.parse(localStorage.getItem('cart'))||[];
+  let shipPrice  = JSON.parse(localStorage.getItem('shipPrice'))||400;
+  const adminPass= 'admin123';
+  const email    = 'badrobigboss3@gmail.com';
+
+  // عند التحميل
+  window.onload=()=>{
+    renderBottles();
+    renderCart();
+    document.getElementById('shipPrice').value=shipPrice;
+  };
+
+  // رفع الصورة إلى Catbox وإرجاع الرابط
+  function uploadImage(input,targetId){
+    if(!input.files||!input.files[0]) return;
+    const file=input.files[0];
+    const form=new FormData();
+    form.append('file',file);
+    fetch('https://catbox.moe/user/api.php',{method:'POST',body:form})
+    .then(r=>r.text())
+    .then(url=>{
+      document.getElementById(targetId).value=url;
+      alert('تم رفع الصورة بنجاح!');
+    })
+    .catch(err=>{alert('فشل الرفع، حاول مجدداً'); console.error(err)});
+  }
+
+  // عرض الزجاجات مع صور
+  function renderBottles(){
+    const box=document.getElementById('bottleList');
+    box.innerHTML='';
+    bottles.forEach((b,idx)=>{
+      const card=document.createElement('div');
+      card.className='bottle-card';
+      card.innerHTML=`
+        <img src="${b.img||'https://via.placeholder.com/80x80?text=زجاجة'}" alt="${b.name}">
+        <div>
+          <div><strong>${b.name}</strong></div>
+          <div>سعة: ${b.capacity} مل</div>
+          <div style="color:var(--gold)">${b.price} دج</div>
+        </div>
+        <button onclick="selectBottle(${idx}); showPerfumes();">اختر هذه الزجاجة</button>
+      `;
+      box.appendChild(card);
+    });
+  }
+
+  // عرض العطور بعد اختيار الزجاجة
+  function showPerfumes(){
+    document.getElementById('perfumeSec').style.display='block';
+    renderPerfumes();
+  }
+
+  // عرض العطور مع صور + زر مشاركة
+  function renderPerfumes(){
+    const box=document.getElementById('perfumeList');
+    box.innerHTML='';
+    perfumes.forEach((p,idx)=>{
+      const card=document.createElement('div');
+      card.className='perfume-card';
+      card.innerHTML=`
+        <img src="${p.img||'https://via.placeholder.com/80x80?text=عطر'}" alt="${p.name}">
+        <div>
+          <div><strong>${p.name}</strong></div>
+          <div>${p.desc||''}</div>
+          <div style="color:var(--gold)">${p.price} دج/مل</div>
+          <a class="share-btn" href="https://wa.me/?text=شاهد هذا العطر: ${encodeURIComponent(p.name)} على موقع عطور الأناقة" target="_blank">مشاركة</a>
+        </div>
+        <button onclick="addToCart(${idx})">أضف إلى السلة</button>
+      `;
+      box.appendChild(card);
+    });
+  }
+
+  // بحث حيّ
+  function filterPerfumes(){
+    const val=document.getElementById('searchBox').value.toLowerCase();
+    document.querySelectorAll('#perfumeList .perfume-card').forEach(c=>{
+      const txt=c.textContent.toLowerCase();
+      c.style.display=txt.includes(val)?'flex':'none';
+    });
+  }
+
+  // ترتيب
+  function sortPerfumes(mode){
+    if(mode==='0') return renderPerfumes();
+    const sorted=[...perfumes].sort((a,b)=> mode==='1' ? a.price-b.price : b.price-a.price);
+    perfumes=sorted;
+    renderPerfumes();
+  }
+
+  // إضافة إلى السلة
+  let selectedBottleIdx=null;
+  function addToCart(pIdx){
+    if(selectedBottleIdx===null) return alert('يرجى اختيار زجاجة أولاً');
+    const p=perfumes[pIdx], b=bottles[selectedBottleIdx];
+    cart.push({pName:p.name, pPrice:p.price, bName:b.name, bCapacity:b.capacity, bPrice:b.price});
+    localStorage.setItem('cart',JSON.stringify(cart));
+    renderCart();
+  }
+  function selectBottle(bIdx){selectedBottleIdx=bIdx;}
+
+  // عرض السلة
+  function renderCart(){
+    const box=document.getElementById('cartItems');
+    const sec=document.getElementById('cartSec');
+    const totalDiv=document.getElementById('cartTotal');
+    box.innerHTML='';
+    if(cart.length===0){sec.style.display='none';document.getElementById('customerSec').style.display='none';return;}
+    sec.style.display='block';
+    let sub=0;
+    cart.forEach((item,i)=>{
+      const line=(item.pPrice*item.bCapacity+item.bPrice).toFixed(2);
+      sub+=parseFloat(line);
+      const div=document.createElement('div');
+      div.className='cart-item';
+      div.innerHTML=`
+        <span>${item.pName} (${item.bCapacity} مل) - ${line} دج</span>
+        <button onclick="removeFromCart(${i})">حذف</button>
+      `;
+      box.appendChild(div);
+    });
+    const total=(sub+shipPrice).toFixed(2);
+    totalDiv.textContent=`المجموع (مع التوصيل): ${total} دج`;
+    document.getElementById('customerSec').style.display='block';
+  }
+  function removeFromCart(i){cart.splice(i,1);localStorage.setItem('cart',JSON.stringify(cart));renderCart();}
+
+  // إتمام الطلب
+  function sendOrder(){
+    const phone=document.getElementById('phone').value.trim();
+    const address=document.getElementById('address').value.trim();
+    const notes=document.getElementById('notes').value.trim();
+    if(!phone||!address) return alert('يرجى إكمال الهاتف والعنوان');
+    let sub=0, details='';
+    cart.forEach(item=>{
+      const line=(item.pPrice*item.bCapacity+item.bPrice).toFixed(2);
+      sub+=parseFloat(line);
+      details+=`\n- ${item.pName} (${item.bCapacity} مل): ${line} دج`;
+    });
+    const total=(sub+shipPrice).toFixed(2);
+    const msg=`
+طلب جديد من موقع عطور الأناقة:
+${details}
+سعر التوصيل داخل وهران: ${shipPrice} دج
+الإجمالي الكامل: ${total} دج
+العنوان: ${address}
+الهاتف: ${phone}
+الملاحظات: ${notes||'لا يوجد'}
+    `;
+    window.open(`https://wa.me/213${phone.replace(/^0/,'')}?text=${encodeURIComponent(msg)}`);
+    location.href=`mailto:${email}?subject=طلب عطر&body=${encodeURIComponent(msg)}`;
+    alert('شكرًا لك! سنتصل بك لتأكيد الطلبية');
+    cart=[]; localStorage.removeItem('cart'); renderCart();
+  }
+
+  // لوحة الأدمين
+  function openAdmin(){
+    const pw=prompt('كلمة مرور الأدمين:');
+    if(pw===adminPass){document.getElementById('adminPanel').style.display='block';listAdmin();}
+    else alert('خطأ!');
+  }
+  function closeAdmin(){
+    document.getElementById('adminPanel').style.display='none';
+    renderBottles(); renderPerfumes();
+  }
+  function listAdmin(){
+    const pList=document.getElementById('perfumeList');
+    const bList=document.getElementById('bottleList');
+    pList.innerHTML=''; bList.innerHTML='';
+    perfumes.forEach((p,i)=>{
+      pList.innerHTML+=`
+        <div class="item-card">
+          <img src="${p.img||''}" width="50">
+          <div>${p.name} - ${p.price} دج/مل</div>
+          <button onclick="delPerfume(${i})">حذف</button>
+        </div>`;
+    });
+    bottles.forEach((b,i)=>{
+      bList.innerHTML+=`
+        <div class="item-card">
+          <img src="${b.img||''}" width="50">
+          <div>${b.name} (${b.capacity} مل) - ${b.price} دج</div>
+          <button onclick="delBottle(${i})">حذف</button>
+        </div>`;
+    });
+  }
+  function addPerfume(){
+    const name=document.getElementById('pName').value.trim();
+    const price=parseFloat(document.getElementById('pPrice').value);
+    const img=document.getElementById('pImg').value.trim();
+    const desc=document.getElementById('pDesc').value.trim();
+    if(!name||!price) return alert('أكمل الاسم والسعر');
+    perfumes.push({name,price,img,desc});
+    localStorage.setItem('perfumes',JSON.stringify(perfumes));
+    listAdmin();
+    document.getElementById('pName').value=document.getElementById('pPrice').value=document.getElementById('pImg').value=document.getElementById('pDesc').value='';
+  }
+  function addBottle(){
+    const name=document.getElementById('bName').value.trim();
+    const capacity=parseInt(document.getElementById('bCapacity').value);
+    const price=parseFloat(document.getElementById('bPrice').value);
+    const img=document.getElementById('bImg').value.trim();
+    if(!name||!capacity||!price) return alert('أكمل الحقول');
+    bottles.push({name,capacity,price,img});
+    localStorage.setItem('bottles',JSON.stringify(bottles));
+    listAdmin();
+    document.getElementById('bName').value=document.getElementById('bCapacity').value=document.getElementById('bPrice').value=document.getElementById('bImg').value='';
+  }
+  function saveShip(){
+    shipPrice=parseFloat(document.getElementById('shipPrice').value)||400;
+    localStorage.setItem('shipPrice',shipPrice);
+    alert('تم حفظ سعر التوصيل');
+  }
+  function delPerfume(i){perfumes.splice(i,1);localStorage.setItem('perfumes',JSON.stringify(perfumes));listAdmin();}
+  function delBottle(i){bottles.splice(i,1);localStorage.setItem('bottles',JSON.stringify(bottles));listAdmin();}
+</script>
+</body>
+</html>

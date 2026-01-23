@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>عطور الأناقة – المتجر الفاخر</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;900&display=swap');
+  
+  :root {
+    --gold: #d4af37;
+    --gold-dim: #b59020;
+    --black: #0f0f0f;
+    --dark-grey: #1a1a1a;
+    --light-grey: #2c2c2c;
+    --white: #f0f0f0;
+    --red: #e74c3c;
+    --green: #2ecc71;
+    --blue: #3498db;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; outline: none; }
+  body { background: var(--black); color: var(--white); direction: rtl; padding-bottom: 80px; }
+
+  /* Header */
+  header {
+    background: linear-gradient(180deg, rgba(0,0,0,0.9), transparent);
+    text-align: center;
+    padding: 30px 20px;
+    border-bottom: 1px solid #333;
+  }
+  header h1 { color: var(--gold); font-size: 2.5rem; letter-spacing: 1px; margin-bottom: 5px; font-weight: 900; }
+  header p { color: #aaa; font-size: 0.9rem; }
+
+  /* Layout */
+  .container { max-width: 800px; margin: auto; padding: 15px; }
+  .section { background: var(--dark-grey); border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); border: 1px solid #333; }
+  
+  h2, h3 { color: var(--gold); margin-bottom: 15px; border-bottom: 2px solid var(--gold-dim); display: inline-block; padding-bottom: 5px; }
+
+  /* Forms & Inputs */
+  label { display: block; margin-top: 10px; font-weight: bold; color: #ccc; }
+  input, select, textarea, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #444; background: var(--light-grey); color: #fff; font-size: 1rem; transition: 0.3s; }
+  input:focus, textarea:focus { border-color: var(--gold); }
+  
+  button { background: var(--gold); color: #000; font-weight: bold; cursor: pointer; border: none; }
+  button:hover { background: var(--gold-dim); transform: translateY(-2px); }
+  button.danger { background: var(--red); color: white; }
+  button.secondary { background: #444; color: white; }
+  button.info { background: var(--blue); color: white; }
+
+  /* Products Grid */
+  .grid-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  
+  /* Cards */
+  .card { background: var(--light-grey); padding: 10px; border-radius: 10px; text-align: center; position: relative; border: 1px solid #333; transition: 0.3s; cursor: pointer; }
+  .card:hover { border-color: var(--gold); transform: translateY(-3px); }
+  .card.selected { border: 2px solid var(--gold); background: #252525; }
+  
+  .card img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; background: #000; }
+  .card h4 { font-size: 0.9rem; margin-bottom: 5px; height: 35px; overflow: hidden; }
+  .card .price { color: var(--gold); font-weight: bold; font-size: 1.1rem; }
+  .badge { position: absolute; top: 5px; right: 5px; background: var(--red); color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; }
+
+  /* Cart */
+  .cart-item { display: flex; justify-content: space-between; align-items: center; background: #252525; padding: 10px; margin-bottom: 8px; border-radius: 8px; border-right: 3px solid var(--gold); }
+  .cart-total { text-align: center; font-size: 1.3rem; margin-top: 15px; color: var(--gold); font-weight: bold; }
+
+  /* Admin Button */
+  .admin-float { position: fixed; bottom: 20px; left: 20px; width: 50px; height: 50px; background: var(--gold); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 999; }
+
+  /* Admin Panel */
+  .admin-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; overflow-y: auto; padding: 20px; }
+  .admin-box { max-width: 900px; margin: 0 auto; background: #151515; padding: 20px; border-radius: 12px; border: 1px solid var(--gold); }
+  .close-btn { float: left; font-size: 2rem; cursor: pointer; color: var(--red); line-height: 20px; }
+  
+  .admin-table-item { display: flex; gap: 10px; align-items: center; background: #222; padding: 10px; margin-bottom: 5px; border-radius: 5px; }
+  .admin-table-item img { width: 40px; height: 40px; border-radius: 5px; object-fit: cover; }
+  .admin-table-item .info { flex: 1; }
+  .admin-actions { display: flex; gap: 5px; }
+  .admin-actions button { padding: 5px 10px; font-size: 0.8rem; width: auto; }
+
+  /* Helper Classes */
+  .hidden { display: none; }
+  .flex-row { display: flex; gap: 10px; }
+  .flex-row input { flex: 1; }
+  
+  /* تحسينات جديدة */
+  .image-upload-container { 
+    background: #222; 
+    padding: 15px; 
+    border-radius: 8px; 
+    margin: 10px 0; 
+    border: 1px dashed #444;
+  }
+  
+  .image-options {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  
+  .image-option-btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 8px;
+    text-align: center;
+  }
+  
+  .progress-bar {
+    height: 5px;
+    background: #333;
+    border-radius: 5px;
+    margin-top: 5px;
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background: var(--green);
+    width: 0%;
+    transition: width 0.3s;
+  }
+  
+  .image-preview-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .image-size-info {
+    font-size: 0.8rem;
+    color: #aaa;
+    text-align: center;
+    margin-top: 5px;
+  }
+  
+  .upload-status {
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin-top: 5px;
+    text-align: center;
+    font-size: 0.9rem;
+  }
+  
+  .upload-success { background: rgba(46, 204, 113, 0.2); color: var(--green); }
+  .upload-error { background: rgba(231, 76, 60, 0.2); color: var(--red); }
+  
+  .drive-url-input {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .drive-url-input input {
+    flex: 3;
+  }
+  
+  .drive-url-input button {
+    flex: 1;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>عطور الأناقة</h1>
+  <p>أفخم العطور بلمساتك الخاصة</p>
+</header>
+
+<div class="container">
+  
+  <div class="section" id="step1">
+    <h2>1. اختر حجم وشكل الزجاجة</h2>
+    <div id="bottlesGrid" class="grid-list"></div>
+  </div>
+
+  <div class="section hidden" id="step2">
+    <h2>2. اختر عطرك المفضل</h2>
+    <input type="text" id="searchPerfume" placeholder="ابحث عن اسم العطر..." oninput="renderPerfumes()">
+    <div class="flex-row" style="margin-bottom:10px;">
+      <select onchange="sortPerfumes(this.value)" style="width:50%">
+        <option value="default">ترتيب افتراضي</option>
+        <option value="low">الأقل سعراً</option>
+        <option value="high">الأعلى سعراً</option>
+      </select>
+    </div>
+    <div id="perfumesGrid" class="grid-list"></div>
+  </div>
+
+  <div class="section hidden" id="cartSection">
+    <h2>سلة المشتريات</h2>
+    <div id="cartList"></div>
+    <div class="cart-total" id="cartTotalDisplay">0 دج</div>
+    
+    <hr style="border-color:#444; margin: 15px 0;">
+    
+    <h3>معلومات التوصيل</h3>
+    <input type="text" id="custName" placeholder="الاسم الكامل">
+    <input type="tel" id="custPhone" placeholder="رقم هاتفك (للتواصل)">
+    <input type="text" id="custAddress" placeholder="عنوان التوصيل (وهران - الحي/البلدية)">
+    <textarea id="custNotes" placeholder="ملاحظات إضافية (اختياري)"></textarea>
+    
+    <button onclick="sendWhatsAppOrder()" style="background:#25D366; color:#fff; font-size:1.2rem;">
+      ✅ إتمام الطلب عبر واتساب
+    </button>
+  </div>
+
+</div>
+
+<div class="admin-float" onclick="openAdmin()">⚙️</div>
+
+<div id="adminPanel" class="admin-overlay">
+  <div class="admin-box">
+    <span class="close-btn" onclick="document.getElementById('adminPanel').style.display='none'">&times;</span>
+    <h2 style="text-align:center;">لوحة التحكم الشاملة</h2>
+    
+    <div style="background:#222; padding:10px; border-radius:8px; margin-bottom:20px;">
+      <label>سعر التوصيل (دج):</label>
+      <div class="flex-row">
+        <input type="number" id="shipPriceInput">
+        <button onclick="saveShipPrice()" style="width:100px;">حفظ</button>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:10px; margin-bottom:15px;">
+      <button onclick="switchAdminTab('perfumes')" id="tabPerfumes">إدارة العطور</button>
+      <button onclick="switchAdminTab('bottles')" id="tabBottles" class="secondary">إدارة الزجاجات</button>
+    </div>
+
+    <div id="addForm" style="background:#222; padding:15px; border-radius:8px; margin-bottom:20px;">
+      <h3 id="formTitle">إضافة عطر جديد</h3>
+      <input type="hidden" id="editIndex" value="-1">
+      <input id="prodName" placeholder="اسم المنتج">
+      <div class="flex-row">
+        <input type="number" id="prodPrice" placeholder="السعر">
+        <input type="number" id="prodCapacity" placeholder="السعة (للزجاجات فقط)" style="display:none">
+      </div>
+      
+      <!-- قسم تحسين رفع الصور -->
+      <div class="image-upload-container">
+        <label>صورة المنتج:</label>
+        
+        <div class="image-options">
+          <button type="button" onclick="showUploadOption('file')" class="image-option-btn secondary" id="btnUploadFile">
+            📁 رفع من جهازك
+          </button>
+          <button type="button" onclick="showUploadOption('drive')" class="image-option-btn info" id="btnUploadDrive">
+            ☁️ رابط Google Drive
+          </button>
+          <button type="button" onclick="showUploadOption('cloudinary')" class="image-option-btn" id="btnUploadCloudinary">
+            🌩️ رفع Cloudinary
+          </button>
+        </div>
+        
+        <!-- خيار رفع الملف -->
+        <div id="uploadFileOption" class="upload-option">
+          <div class="flex-row">
+            <input type="file" id="imgInput" accept="image/*" onchange="handleImageUpload()">
+            <button onclick="clearImageInput()" class="secondary" style="width:50px">X</button>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="uploadProgress"></div>
+          </div>
+        </div>
+        
+        <!-- خيار Google Drive -->
+        <div id="uploadDriveOption" class="upload-option hidden">
+          <div class="drive-url-input">
+            <input type="text" id="driveUrl" placeholder="https://drive.google.com/file/d/...">
+            <button onclick="fetchDriveImage()">جلب الصورة</button>
+          </div>
+          <div id="driveStatus" class="upload-status"></div>
+        </div>
+        
+        <!-- خيار Cloudinary -->
+        <div id="uploadCloudinaryOption" class="upload-option hidden">
+          <div class="flex-row">
+            <input type="file" id="cloudinaryInput" accept="image/*">
+            <button onclick="uploadToCloudinary()" class="info">رفع إلى Cloudinary</button>
+          </div>
+          <div id="cloudinaryStatus" class="upload-status"></div>
+        </div>
+        
+        <!-- معاينة الصورة -->
+        <div class="image-preview-container">
+          <img id="imgPreview" src="" style="width:120px; height:120px; object-fit:cover; display:none; border:2px solid var(--gold); border-radius:8px;">
+          <div style="flex:1; min-width:200px;">
+            <div id="imageInfo" class="image-size-info"></div>
+            <div id="uploadStatus" class="upload-status"></div>
+          </div>
+        </div>
+        
+        <input type="hidden" id="imgData">
+      </div>
+      
+      <textarea id="prodDesc" placeholder="وصف المنتج (للعطور)" style="height:60px;"></textarea>
+      
+      <div class="flex-row" id="perfumeOptions">
+        <label style="flex:1"><input type="checkbox" id="isDiscount"> تخفيض</label>
+        <label style="flex:1"><input type="checkbox" id="isPinned"> مثبت (يظهر أولاً)</label>
+      </div>
+      
+      <div class="flex-row">
+        <button onclick="saveProduct()">حفظ المنتج</button>
+        <button onclick="resetForm()" class="secondary">إلغاء / جديد</button>
+      </div>
+    </div>
+
+    <h3>قائمة المنتجات</h3>
+    <div id="adminList"></div>
+
+  </div>
+</div>
+
+<script>
+  /* --- الإعدادات والبيانات --- */
+  const ADMIN_PHONE = "213795795754"; // رقمك بدون +
+  const ADMIN_PASS = "abdou123456";   // كلمة مرور اللوحة الجديدة
+  
+  // إعدادات Cloudinary
+  const CLOUDINARY_CLOUD_NAME = "dtkgml8yg";
+  const CLOUDINARY_UPLOAD_PRESET = "products";
+  const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+
+  let data = {
+    perfumes: JSON.parse(localStorage.getItem('perfumes')) || [],
+    bottles: JSON.parse(localStorage.getItem('bottles')) || [],
+    shipping: parseInt(localStorage.getItem('shipping')) || 400
+  };
+  
+  let cart = [];
+  let currentBottleIdx = null;
+  let adminCurrentTab = 'perfumes'; // 'perfumes' or 'bottles'
+  let currentUploadOption = 'file';
+
+  /* --- دوال البدء --- */
+  window.onload = function() {
+    renderBottlesUser();
+    document.getElementById('shipPriceInput').value = data.shipping;
+    showUploadOption('file'); // عرض خيار الرفع الافتراضي
+  };
+
+  /* --- تحسينات نظام رفع الصور --- */
+  
+  function showUploadOption(option) {
+    // إخفاء جميع الخيارات
+    document.getElementById('uploadFileOption').classList.add('hidden');
+    document.getElementById('uploadDriveOption').classList.add('hidden');
+    document.getElementById('uploadCloudinaryOption').classList.add('hidden');
+    
+    // إعادة تنسيق الأزرار
+    document.getElementById('btnUploadFile').className = 'image-option-btn secondary';
+    document.getElementById('btnUploadDrive').className = 'image-option-btn info';
+    document.getElementById('btnUploadCloudinary').className = 'image-option-btn';
+    
+    // إظهار الخيار المحدد
+    document.getElementById(`upload${option.charAt(0).toUpperCase() + option.slice(1)}Option`).classList.remove('hidden');
+    
+    // تمييز الزر النشط
+    document.getElementById(`btnUpload${option.charAt(0).toUpperCase() + option.slice(1)}`).className = 'image-option-btn';
+    
+    currentUploadOption = option;
+  }
+
+  function clearImageInput() {
+    document.getElementById('imgInput').value = '';
+    document.getElementById('cloudinaryInput').value = '';
+    document.getElementById('driveUrl').value = '';
+    document.getElementById('imgPreview').style.display = 'none';
+    document.getElementById('imgData').value = '';
+    document.getElementById('imageInfo').innerHTML = '';
+    document.getElementById('uploadStatus').innerHTML = '';
+    document.getElementById('driveStatus').innerHTML = '';
+    document.getElementById('cloudinaryStatus').innerHTML = '';
+    document.getElementById('uploadProgress').style.width = '0%';
+  }
+
+  /* --- معالجة الصور مع ضغط ذكي --- */
+  async function handleImageUpload() {
+    const fileInput = document.getElementById('imgInput');
+    const file = fileInput.files[0];
+    
+    if (!file) return;
+    
+    // التحقق من نوع الملف
+    if (!file.type.match('image.*')) {
+      showUploadStatus('يرجى اختيار ملف صورة فقط', 'error');
+      return;
+    }
+    
+    // التحقق من حجم الملف (الحد الأقصى 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      showUploadStatus('حجم الملف كبير جداً (الحد الأقصى 5MB)', 'error');
+      return;
+    }
+    
+    // عرض شريط التقدم
+    const progressBar = document.getElementById('uploadProgress');
+    progressBar.style.width = '30%';
+    
+    try {
+      // قراءة الصورة
+      const reader = new FileReader();
+      
+      reader.onload = async function(event) {
+        const img = new Image();
+        img.src = event.target.result;
+        
+        img.onload = async function() {
+          // تحديد الأبعاد المناسبة بناءً على نوع المنتج
+          let maxWidth, maxHeight, quality;
+          
+          if (adminCurrentTab === 'perfumes') {
+            // للعطور: صور متوسطة الحجم
+            maxWidth = 400;
+            maxHeight = 400;
+            quality = 0.8;
+          } else {
+            // للزجاجات: صور أصغر
+            maxWidth = 300;
+            maxHeight = 300;
+            quality = 0.7;
+          }
+          
+          // حساب الأبعاد الجديدة مع الحفاظ على نسبة العرض إلى الارتفاع
+          let width = img.width;
+          let height = img.height;
+          
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+          
+          if (height > maxHeight) {
+            width = (width * maxHeight) / height;
+            height = maxHeight;
+          }
+          
+          // إنشاء Canvas وضغط الصورة
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = width;
+          canvas.height = height;
+          
+          // رسم الصورة المضغوطة
+          ctx.drawImage(img, 0, 0, width, height);
+          progressBar.style.width = '70%';
+          
+          // تحويل إلى Base64
+          const dataUrl = canvas.toDataURL('image/jpeg', quality);
+          
+          // حفظ الصورة
+          document.getElementById('imgData').value = dataUrl;
+          document.getElementById('imgPreview').src = dataUrl;
+          document.getElementById('imgPreview').style.display = 'block';
+          
+          // عرض معلومات الصورة
+          const originalSize = formatBytes(file.size);
+          const compressedSize = formatBytes(dataUrl.length * 0.75); // تقدير حجم Base64
+          const compressionRatio = Math.round((1 - (dataUrl.length * 0.75 / file.size)) * 100);
+          
+          document.getElementById('imageInfo').innerHTML = `
+            <div>الأبعاد: ${Math.round(width)} × ${Math.round(height)} بكسل</div>
+            <div>الحجم الأصلي: ${originalSize} | بعد الضغط: ${compressedSize}</div>
+            <div>نسبة الضغط: ${compressionRatio}%</div>
+          `;
+          
+          progressBar.style.width = '100%';
+          showUploadStatus('✅ تم رفع الصورة بنجاح', 'success');
+          
+          // إخفاء شريط التقدم بعد ثانية
+          setTimeout(() => {
+            progressBar.style.width = '0%';
+          }, 1000);
+        };
+        
+        img.onerror = function() {
+          showUploadStatus('❌ خطأ في تحميل الصورة', 'error');
+          progressBar.style.width = '0%';
+        };
+      };
+      
+      reader.onerror = function() {
+        showUploadStatus('❌ خطأ في قراءة الملف', 'error');
+        progressBar.style.width = '0%';
+      };
+      
+      reader.readAsDataURL(file);
+      
+    } catch (error) {
+      showUploadStatus(`❌ خطأ: ${error.message}`, 'error');
+      progressBar.style.width = '0%';
+    }
+  }
+
+  /* --- جلب الصور من Google Drive --- */
+  async function fetchDriveImage() {
+    const driveUrl = document.getElementById('driveUrl').value.trim();
+    const statusDiv = document.getElementById('driveStatus');
+    
+    if (!driveUrl) {
+      statusDiv.innerHTML = '<div class="upload-error">❌ يرجى إدخال رابط Google Drive</div>';
+      return;
+    }
+    
+    // استخراج معرف الملف من رابط Google Drive
+    let fileId = '';
+    
+    // نمط الروابط الشائعة لـ Google Drive
+    const patterns = [
+      /\/file\/d\/([a-zA-Z0-9_-]+)/,
+      /id=([a-zA-Z0-9_-]+)/,
+      /([a-zA-Z0-9_-]{25,})/
+    ];
+    
+    for (const pattern of patterns) {
+      const match = driveUrl.match(pattern);
+      if (match && match[1]) {
+        fileId = match[1];
+        break;
+      }
+    }
+    
+    if (!fileId) {
+      statusDiv.innerHTML = '<div class="upload-error">❌ رابط غير صالح. تأكد من نسخ الرابط الصحيح</div>';
+      return;
+    }
+    
+    statusDiv.innerHTML = '<div>⏳ جاري جلب الصورة...</div>';
+    
+    try {
+      // إنشاء رابط مباشر للصورة من Google Drive
+      const directUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
+      
+      // استخدام proxy إذا لزم الأمر لتجاوز CORS
+      const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(directUrl)}`;
+      
+      // جلب الصورة
+      const response = await fetch(proxyUrl);
+      
+      if (!response.ok) {
+        throw new Error('فشل في جلب الصورة');
+      }
+      
+      // تحويل الصورة إلى blob
+      const blob = await response.blob();
+      
+      // إنشاء File من Blob
+      const file = new File([blob], "drive-image.jpg", { type: blob.type });
+      
+      // محاكاة اختيار الملف
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      document.getElementById('imgInput').files = dataTransfer.files;
+      
+      // معالجة الصورة
+      await handleImageUpload();
+      
+      statusDiv.innerHTML = '<div class="upload-success">✅ تم جلب الصورة بنجاح من Google Drive</div>';
+      
+    } catch (error) {
+      console.error('خطأ في جلب صورة Drive:', error);
+      statusDiv.innerHTML = `<div class="upload-error">❌ خطأ في جلب الصورة: ${error.message}</div>`;
+    }
+  }
+
+  /* --- رفع الصور إلى Cloudinary --- */
+  async function uploadToCloudinary() {
+    const fileInput = document.getElementById('cloudinaryInput');
+    const file = fileInput.files[0];
+    const statusDiv = document.getElementById('cloudinaryStatus');
+    
+    if (!file) {
+      statusDiv.innerHTML = '<div class="upload-error">❌ يرجى اختيار صورة أولاً</div>';
+      return;
+    }
+    
+    statusDiv.innerHTML = '<div>⏳ جاري الرفع إلى Cloudinary...</div>';
+    
+    try {
+      // إنشاء FormData
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      
+      // إرسال الطلب إلى Cloudinary
+      const response = await fetch(CLOUDINARY_UPLOAD_URL, {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!response.ok) {
+        throw new Error(`خطأ في الرفع: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      // حفظ رابط الصورة
+      const imageUrl = result.secure_url;
+      document.getElementById('imgData').value = imageUrl;
+      document.getElementById('imgPreview').src = imageUrl;
+      document.getElementById('imgPreview').style.display = 'block';
+      
+      // عرض معلومات الصورة
+      document.getElementById('imageInfo').innerHTML = `
+        <div>✅ تم الرفع إلى Cloudinary</div>
+        <div>الأبعاد: ${result.width} × ${result.height} بكسل</div>
+        <div>الحجم: ${formatBytes(result.bytes)}</div>
+      `;
+      
+      statusDiv.innerHTML = '<div class="upload-success">✅ تم رفع الصورة بنجاح إلى Cloudinary</div>';
+      showUploadStatus('✅ تم حفظ رابط Cloudinary', 'success');
+      
+    } catch (error) {
+      console.error('خطأ في رفع Cloudinary:', error);
+      statusDiv.innerHTML = `<div class="upload-error">❌ خطأ في الرفع: ${error.message}</div>`;
+      showUploadStatus('❌ فشل رفع Cloudinary', 'error');
+    }
+  }
+
+  /* --- دوال مساعدة --- */
+  function showUploadStatus(message, type) {
+    const statusDiv = document.getElementById('uploadStatus');
+    statusDiv.innerHTML = `<div class="upload-${type}">${message}</div>`;
+  }
+
+  function formatBytes(bytes, decimals = 2) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  }
+
+  /* --- دوال واجهة المستخدم (العميل) --- */
+  
+  function renderBottlesUser() {
+    const grid = document.getElementById('bottlesGrid');
+    grid.innerHTML = '';
+    data.bottles.forEach((b, index) => {
+      grid.innerHTML += `
+        <div class="card ${currentBottleIdx === index ? 'selected' : ''}" onclick="selectBottle(${index})">
+          <img src="${b.img || 'https://via.placeholder.com/150?text=زجاجة'}" loading="lazy" onerror="this.src='https://via.placeholder.com/150?text=زجاجة'">
+          <h4>${b.name}</h4>
+          <div class="price">${b.capacity} مل | ${b.price} دج</div>
+        </div>
+      `;
+    });
+  }
+
+  function selectBottle(index) {
+    currentBottleIdx = index;
+    renderBottlesUser(); // لتحديث الستايل المختار
+    document.getElementById('step2').classList.remove('hidden');
+    renderPerfumes();
+    // تمرير تلقائي للأسفل
+    document.getElementById('step2').scrollIntoView({behavior: 'smooth'});
+  }
+
+  function renderPerfumes() {
+    const grid = document.getElementById('perfumesGrid');
+    grid.innerHTML = '';
+    const search = document.getElementById('searchPerfume').value.toLowerCase();
+    
+    // الترتيب والفلترة
+    let list = data.perfumes.filter(p => p.name.toLowerCase().includes(search));
+    
+    // منطق الترتيب (المثبت أولاً دائماً)
+    list.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+    
+    list.forEach((p) => {
+      // البحث عن الإندكس الأصلي للإضافة للسلة
+      const originalIndex = data.perfumes.indexOf(p);
+      grid.innerHTML += `
+        <div class="card" onclick="addToCart(${originalIndex})">
+          ${p.discount ? '<span class="badge">تخفيض</span>' : ''}
+          <img src="${p.img || 'https://via.placeholder.com/150?text=عطر'}" loading="lazy" onerror="this.src='https://via.placeholder.com/150?text=عطر'">
+          <h4>${p.name}</h4>
+          <p style="font-size:0.8rem; color:#aaa; height:30px; overflow:hidden;">${p.desc || ''}</p>
+          <div class="price">${p.price} دج/مل</div>
+          <button style="margin-top:5px; font-size:0.8rem;">أضف للسلة +</button>
+        </div>
+      `;
+    });
+  }
+
+  function sortPerfumes(mode) {
+    if (mode === 'low') data.perfumes.sort((a,b) => a.price - b.price);
+    if (mode === 'high') data.perfumes.sort((a,b) => b.price - a.price);
+    renderPerfumes();
+  }
+
+  function addToCart(perfumeIdx) {
+    if (currentBottleIdx === null) return alert("الرجاء اختيار الزجاجة أولاً!");
+    
+    const p = data.perfumes[perfumeIdx];
+    const b = data.bottles[currentBottleIdx];
+    
+    // حساب السعر: (سعر المليلتر * السعة) + سعر الزجاجة
+    const itemTotal = (p.price * b.capacity) + b.price;
+    
+    cart.push({
+      pName: p.name,
+      bName: b.name,
+      capacity: b.capacity,
+      price: itemTotal
+    });
+    
+    renderCart();
+    document.getElementById('cartSection').classList.remove('hidden');
+    document.getElementById('cartSection').scrollIntoView({behavior: 'smooth'});
+  }
+
+  function renderCart() {
+    const list = document.getElementById('cartList');
+    list.innerHTML = '';
+    let total = 0;
+    
+    cart.forEach((item, idx) => {
+      total += item.price;
+      list.innerHTML += `
+        <div class="cart-item">
+          <div>
+            <strong>${item.pName}</strong> <br>
+            <small style="color:#aaa">زجاجة: ${item.bName} (${item.capacity} مل)</small>
+          </div>
+          <div style="text-align:left">
+            <div style="color:var(--gold)">${item.price} دج</div>
+            <button onclick="removeFromCart(${idx})" class="danger" style="padding:2px 8px; font-size:0.7rem;">حذف</button>
+          </div>
+        </div>
+      `;
+    });
+    
+    const grandTotal = total + data.shipping;
+    document.getElementById('cartTotalDisplay').innerHTML = `
+      المجموع: ${total} دج <br>
+      <span style="font-size:0.9rem; color:#fff">+ توصيل: ${data.shipping} دج</span> <br>
+      ------------------ <br>
+      الإجمالي: ${grandTotal} دج
+    `;
+  }
+
+  function removeFromCart(idx) {
+    cart.splice(idx, 1);
+    renderCart();
+    if (cart.length === 0) document.getElementById('cartSection').classList.add('hidden');
+  }
+
+  function sendWhatsAppOrder() {
+    const name = document.getElementById('custName').value.trim();
+    const phone = document.getElementById('custPhone').value.trim();
+    const address = document.getElementById('custAddress').value.trim();
+    const notes = document.getElementById('custNotes').value.trim();
+    
+    if (!name || !address || !phone) return alert("يرجى إكمال جميع البيانات (الاسم، الهاتف، العنوان)!");
+    if (cart.length === 0) return alert("السلة فارغة!");
+
+    let orderDetails = "";
+    let subTotal = 0;
+    
+    cart.forEach(item => {
+      subTotal += item.price;
+      orderDetails += `▪️ ${item.pName} (${item.capacity}مل) - ${item.price} دج\n`;
+    });
+    
+    const total = subTotal + data.shipping;
+    
+    const msg = `
+*طلب جديد من متجر العطور* 🛍️
+------------------------
+الاسم: ${name}
+📱 الهاتف: ${phone}
+العنوان: ${address}
+------------------------
+*الطلبات:*
+${orderDetails}
+------------------------
+سعر المنتجات: ${subTotal} دج
+سعر التوصيل: ${data.shipping} دج
+*الإجمالي النهائي: ${total} دج*
+------------------------
+ملاحظات: ${notes}
+    `.trim();
+
+    const url = `https://wa.me/${ADMIN_PHONE}?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+  }
+
+  /* --- لوحة تحكم الأدمن --- */
+
+  function openAdmin() {
+    const pass = prompt("أدخل كلمة المرور:");
+    if (pass === ADMIN_PASS) {
+      document.getElementById('adminPanel').style.display = 'block';
+      renderAdminList();
+    } else if(pass) {
+      alert("كلمة المرور خاطئة");
+    }
+  }
+
+  function switchAdminTab(tab) {
+    adminCurrentTab = tab;
+    // تحديث الأزرار
+    document.getElementById('tabPerfumes').className = tab === 'perfumes' ? '' : 'secondary';
+    document.getElementById('tabBottles').className = tab === 'bottles' ? '' : 'secondary';
+    
+    // تحديث الفورم
+    resetForm();
+    if (tab === 'bottles') {
+      document.getElementById('formTitle').innerText = 'إدارة الزجاجات';
+      document.getElementById('prodCapacity').style.display = 'block';
+      document.getElementById('perfumeOptions').style.display = 'none';
+      document.getElementById('prodDesc').style.display = 'none';
+      document.getElementById('prodPrice').placeholder = 'سعر الزجاجة الفارغة';
+    } else {
+      document.getElementById('formTitle').innerText = 'إدارة العطور';
+      document.getElementById('prodCapacity').style.display = 'none';
+      document.getElementById('perfumeOptions').style.display = 'flex';
+      document.getElementById('prodDesc').style.display = 'block';
+      document.getElementById('prodPrice').placeholder = 'سعر المليلتر الواحد';
+    }
+    renderAdminList();
+  }
+
+  function saveProduct() {
+    const name = document.getElementById('prodName').value;
+    const price = parseFloat(document.getElementById('prodPrice').value);
+    const img = document.getElementById('imgData').value;
+    const index = parseInt(document.getElementById('editIndex').value);
+    
+    if (!name || isNaN(price)) return alert("الاسم والسعر مطلوبان");
+
+    let item = { name, price, img };
+
+    if (adminCurrentTab === 'perfumes') {
+      item.desc = document.getElementById('prodDesc').value;
+      item.discount = document.getElementById('isDiscount').checked;
+      item.pinned = document.getElementById('isPinned').checked;
+      
+      if (index === -1) data.perfumes.push(item);
+      else data.perfumes[index] = item;
+      localStorage.setItem('perfumes', JSON.stringify(data.perfumes));
+      
+    } else {
+      const cap = parseInt(document.getElementById('prodCapacity').value);
+      if (!cap) return alert("يرجى تحديد سعة الزجاجة");
+      item.capacity = cap;
+      
+      if (index === -1) data.bottles.push(item);
+      else data.bottles[index] = item;
+      localStorage.setItem('bottles', JSON.stringify(data.bottles));
+    }
+
+    alert("تم الحفظ بنجاح!");
+    resetForm();
+    renderAdminList();
+    renderBottlesUser(); // تحديث الواجهة الرئيسية
+  }
+
+  function renderAdminList() {
+    const list = document.getElementById('adminList');
+    list.innerHTML = '';
+    const array = adminCurrentTab === 'perfumes' ? data.perfumes : data.bottles;
+
+    array.forEach((item, idx) => {
+      list.innerHTML += `
+        <div class="admin-table-item">
+          <img src="${item.img || 'https://via.placeholder.com/50'}" onerror="this.src='https://via.placeholder.com/50'">
+          <div class="info">
+            <strong>${item.name}</strong> <br>
+            <small>${item.price} دج - ${adminCurrentTab==='bottles' ? item.capacity+'مل' : (item.pinned?'مثبت':'')}</small>
+          </div>
+          <div class="admin-actions">
+            <button onclick="editProduct(${idx})" style="background:var(--gold-dim)">تعديل</button>
+            <button onclick="deleteProduct(${idx})" class="danger">X</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  function editProduct(idx) {
+    const array = adminCurrentTab === 'perfumes' ? data.perfumes : data.bottles;
+    const item = array[idx];
+    
+    document.getElementById('editIndex').value = idx;
+    document.getElementById('prodName').value = item.name;
+    document.getElementById('prodPrice').value = item.price;
+    document.getElementById('imgData').value = item.img || '';
+    
+    if (item.img) {
+      document.getElementById('imgPreview').src = item.img;
+      document.getElementById('imgPreview').style.display = 'block';
+      
+      // عرض معلومات الصورة إذا كانت موجودة
+      if (item.img.startsWith('data:')) {
+        document.getElementById('imageInfo').innerHTML = '<div>صورة محفوظة محلياً</div>';
+      } else if (item.img.includes('cloudinary')) {
+        document.getElementById('imageInfo').innerHTML = '<div>صورة من Cloudinary</div>';
+      } else {
+        document.getElementById('imageInfo').innerHTML = '<div>صورة من رابط خارجي</div>';
+      }
+    }
+
+    if (adminCurrentTab === 'perfumes') {
+      document.getElementById('prodDesc').value = item.desc || '';
+      document.getElementById('isDiscount').checked = item.discount || false;
+      document.getElementById('isPinned').checked = item.pinned || false;
+    } else {
+      document.getElementById('prodCapacity').value = item.capacity;
+    }
+    
+    // تحديد خيار الرفع المناسب
+    if (item.img) {
+      if (item.img.includes('cloudinary')) {
+        showUploadOption('cloudinary');
+      } else if (item.img.startsWith('http')) {
+        document.getElementById('driveUrl').value = item.img;
+        showUploadOption('drive');
+      } else {
+        showUploadOption('file');
+      }
+    }
+    
+    // سكرول للفورم
+    document.getElementById('addForm').scrollIntoView({behavior: 'smooth'});
+  }
+
+  function deleteProduct(idx) {
+    if(!confirm("هل أنت متأكد من الحذف؟")) return;
+    
+    if (adminCurrentTab === 'perfumes') {
+      data.perfumes.splice(idx, 1);
+      localStorage.setItem('perfumes', JSON.stringify(data.perfumes));
+    } else {
+      data.bottles.splice(idx, 1);
+      localStorage.setItem('bottles', JSON.stringify(data.bottles));
+    }
+    renderAdminList();
+    renderBottlesUser();
+  }
+
+  function resetForm() {
+    document.getElementById('editIndex').value = -1;
+    document.getElementById('prodName').value = '';
+    document.getElementById('prodPrice').value = '';
+    document.getElementById('prodCapacity').value = '';
+    document.getElementById('prodDesc').value = '';
+    document.getElementById('imgData').value = '';
+    document.getElementById('imgInput').value = '';
+    document.getElementById('cloudinaryInput').value = '';
+    document.getElementById('driveUrl').value = '';
+    document.getElementById('imgPreview').style.display = 'none';
+    document.getElementById('imageInfo').innerHTML = '';
+    document.getElementById('uploadStatus').innerHTML = '';
+    document.getElementById('driveStatus').innerHTML = '';
+    document.getElementById('cloudinaryStatus').innerHTML = '';
+    document.getElementById('isDiscount').checked = false;
+    document.getElementById('isPinned').checked = false;
+    document.getElementById('uploadProgress').style.width = '0%';
+    
+    // العودة إلى خيار الرفع الافتراضي
+    showUploadOption('file');
+  }
+
+  function saveShipPrice() {
+    const p = document.getElementById('shipPriceInput').value;
+    data.shipping = parseInt(p);
+    localStorage.setItem('shipping', data.shipping);
+    alert('تم تحديث سعر التوصيل');
+  }
+</script>
+
+</body>
+</html>

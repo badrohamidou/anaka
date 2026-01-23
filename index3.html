@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>عطور الأناقة – المتجر الفاخر</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;900&display=swap');
+
+:root{
+  --gold:#d4af37;--gold-dim:#b59020;--black:#0f0f0f;
+  --dark:#1a1a1a;--light:#2c2c2c;--white:#f0f0f0;
+  --red:#e74c3c;--green:#2ecc71;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Tajawal',sans-serif}
+body{background:var(--black);color:var(--white);direction:rtl;padding-bottom:80px}
+
+header{text-align:center;padding:30px;border-bottom:1px solid #333}
+header h1{color:var(--gold);font-size:2.5rem;font-weight:900}
+header p{color:#aaa}
+
+.container{max-width:900px;margin:auto;padding:15px}
+.section{background:var(--dark);border-radius:15px;padding:20px;margin-bottom:20px;border:1px solid #333}
+
+h2,h3{color:var(--gold);margin-bottom:15px;border-bottom:2px solid var(--gold-dim);display:inline-block}
+
+input,select,textarea,button{
+  width:100%;padding:12px;margin:6px 0;border-radius:8px;
+  border:1px solid #444;background:var(--light);color:#fff
+}
+button{background:var(--gold);color:#000;font-weight:bold;cursor:pointer}
+button:hover{background:var(--gold-dim)}
+button.secondary{background:#444;color:#fff}
+button.danger{background:var(--red);color:#fff}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+
+.card{
+  background:var(--light);padding:10px;border-radius:10px;
+  text-align:center;border:1px solid #333;cursor:pointer
+}
+.card:hover{border-color:var(--gold)}
+.card img{
+  width:100%;height:130px;object-fit:cover;
+  aspect-ratio:1/1;border-radius:8px
+}
+.price{color:var(--gold);font-weight:bold}
+
+.hidden{display:none}
+.flex{display:flex;gap:10px}
+
+.admin-float{
+  position:fixed;bottom:20px;left:20px;
+  width:50px;height:50px;background:var(--gold);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:1.5rem
+}
+
+.admin-overlay{
+  display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,.95);z-index:999;overflow:auto
+}
+.admin-box{
+  max-width:900px;margin:20px auto;background:#151515;
+  padding:20px;border-radius:12px;border:1px solid var(--gold)
+}
+
+.admin-item{
+  display:flex;gap:10px;align-items:center;
+  background:#222;padding:10px;margin-bottom:5px;border-radius:5px
+}
+.admin-item img{width:40px;height:40px;border-radius:5px;object-fit:cover}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>عطور الأناقة</h1>
+  <p>أفخم العطور بلمستك الخاصة</p>
+</header>
+
+<div class="container">
+
+<div class="section">
+<h2>الزجاجات</h2>
+<div id="bottles" class="grid"></div>
+</div>
+
+<div class="section hidden" id="perfumeSection">
+<h2>العطور</h2>
+<div id="perfumes" class="grid"></div>
+</div>
+
+</div>
+
+<div class="admin-float" onclick="openAdmin()">⚙️</div>
+
+<div class="admin-overlay" id="admin">
+<div class="admin-box">
+<span onclick="admin.style.display='none'" style="float:left;font-size:30px;cursor:pointer;color:red">&times;</span>
+
+<h2>لوحة التحكم</h2>
+
+<input id="name" placeholder="اسم المنتج">
+<input id="price" type="number" placeholder="السعر">
+<input id="capacity" type="number" placeholder="السعة (للزجاجات فقط)">
+
+<label>رفع صورة:</label>
+<input type="file" id="imgInput" accept="image/*">
+
+<label>أو رابط صورة (Google Drive):</label>
+<input type="url" id="imgUrl" placeholder="https://drive.google.com/...">
+
+<img id="preview" style="width:60px;height:60px;display:none">
+
+<button onclick="save()">حفظ</button>
+
+<h3>المنتجات</h3>
+<div id="adminList"></div>
+
+</div>
+</div>
+
+<script>
+const ADMIN_PASS="1234";
+let bottles=JSON.parse(localStorage.getItem("bottles"))||[];
+let perfumes=JSON.parse(localStorage.getItem("perfumes"))||[];
+let currentBottle=null;
+let imgData="";
+
+imgInput.onchange=e=>{
+ const f=e.target.files[0];if(!f)return;
+ const r=new FileReader();
+ r.onload=ev=>{
+  const i=new Image();
+  i.src=ev.target.result;
+  i.onload=()=>{
+   const c=document.createElement("canvas");
+   const ctx=c.getContext("2d");
+   let w=i.width,h=i.height,max=600;
+   if(w>h&&w>max){h*=max/w;w=max}
+   else if(h>max){w*=max/h;h=max}
+   c.width=w;c.height=h;
+   ctx.drawImage(i,0,0,w,h);
+   imgData=c.toDataURL("image/webp",0.75);
+   preview.src=imgData;preview.style.display="block";
+  }
+ }
+ r.readAsDataURL(f);
+};
+
+function save(){
+ const name=nameInput.value=name.value;
+ const priceVal=price.value;
+ const cap=capacity.value;
+ const img=imgData||imgUrl.value;
+
+ if(!name||!priceVal)return alert("أدخل الاسم والسعر");
+
+ if(cap){
+  bottles.push({name,price:priceVal,capacity:cap,img});
+  localStorage.setItem("bottles",JSON.stringify(bottles));
+  renderBottles();
+ }else{
+  perfumes.push({name,price:priceVal,img});
+  localStorage.setItem("perfumes",JSON.stringify(perfumes));
+ }
+ alert("تم الحفظ");
+ imgData="";imgUrl.value="";preview.style.display="none";
+ renderAdmin();
+}
+
+function renderBottles(){
+ bottlesDiv.innerHTML="";
+ bottles.forEach((b,i)=>{
+  bottlesDiv.innerHTML+=`
+  <div class="card" onclick="selectBottle(${i})">
+   <img src="${b.img}" onerror="this.src='https://via.placeholder.com/150'">
+   <h4>${b.name}</h4>
+   <div class="price">${b.capacity} مل</div>
+  </div>`;
+ });
+}
+function selectBottle(i){
+ currentBottle=i;
+ perfumeSection.classList.remove("hidden");
+ renderPerfumes();
+}
+function renderPerfumes(){
+ perfumesDiv.innerHTML="";
+ perfumes.forEach(p=>{
+  perfumesDiv.innerHTML+=`
+  <div class="card">
+   <img src="${p.img}" onerror="this.src='https://via.placeholder.com/150'">
+   <h4>${p.name}</h4>
+   <div class="price">${p.price} دج</div>
+  </div>`;
+ });
+}
+
+function openAdmin(){
+ const p=prompt("كلمة المرور");
+ if(p===ADMIN_PASS){admin.style.display="block";renderAdmin()}
+}
+
+function renderAdmin(){
+ adminList.innerHTML="";
+ [...bottles,...perfumes].forEach(i=>{
+  adminList.innerHTML+=`
+  <div class="admin-item">
+   <img src="${i.img}" onerror="this.src='https://via.placeholder.com/50'">
+   <strong>${i.name}</strong>
+  </div>`;
+ });
+}
+
+renderBottles();
+</script>
+
+</body>
+</html>
